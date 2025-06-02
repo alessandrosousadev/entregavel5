@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Produtos CRUD</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    ul {
+      padding-left: 0;
+      list-style: none;
+    }
+    li {
+      background: #f0f0f0;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    label, input, textarea {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Produtos</h1>
+
+  <ul id="produtos-lista"></ul>
+
+  <h2>Adicionar Produto</h2>
+  <form id="produto-form">
+    <label for="nome">Nome</label>
+    <input type="text" id="nome" name="nome" required />
+
+    <label for="descricao">Descrição</label>
+    <textarea id="descricao" name="descricao" rows="3"></textarea>
+
+    <label for="preco">Preço</label>
+    <input type="number" step="0.01" id="preco" name="preco" required />
+
+    <button type="submit">Adicionar</button>
+  </form>
+
+  <script>
+    const apiBaseUrl = 'http://localhost:3000'; // Coloque a URL do seu backend aqui
+
+    async function buscarProdutos() {
+      const res = await fetch(${apiBaseUrl}/produtos);
+      if (!res.ok) {
+        alert('Erro ao buscar produtos');
+        return;
+      }
+      const produtos = await res.json();
+      const lista = document.getElementById('produtos-lista');
+      lista.innerHTML = '';
+      produtos.forEach(produto => {
+        const li = document.createElement('li');
+        li.textContent = ${produto.name} — R$ ${produto.price.toFixed(2)}\n${produto.description || ''};
+        lista.appendChild(li);
+      });
+    }
+
+    async function adicionarProduto(event) {
+      event.preventDefault();
+      const nome = document.getElementById('nome').value.trim();
+      const descricao = document.getElementById('descricao').value.trim();
+      const preco = parseFloat(document.getElementById('preco').value);
+
+      if (!nome || isNaN(preco)) {
+        alert('Preencha nome e preço corretamente.');
+        return;
+      }
+
+      const produto = { name: nome, description: descricao, price: preco };
+
+      const res = await fetch(${apiBaseUrl}/produtos, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(produto),
+      });
+
+      if (!res.ok) {
+        alert('Erro ao adicionar produto');
+        return;
+      }
+
+      document.getElementById('produto-form').reset();
+      buscarProdutos();
+    }
+
+    document.getElementById('produto-form').addEventListener('submit', adicionarProduto);
+
+    // Busca produtos ao carregar a página
+    buscarProdutos();
+  </script>
+</body>
+</html>
